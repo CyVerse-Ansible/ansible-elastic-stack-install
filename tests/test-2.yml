@@ -1,6 +1,10 @@
 ---
 - name: Verify Logstash Directory Layout - w/ `es_instance_name`
   hosts: localhost
+  vars:
+     ES_CONFIG_CONTENTS: 
+       sample_var1: sample1
+       sample_var2: sample2
   remote_user: root
   pre_tasks:
      - when: es_home != '/usr/share/{{ES_PACKAGE}}'
