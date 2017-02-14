@@ -1,0 +1,64 @@
+---
+
+
+- when: es_use_repository
+  name: Debian - Install apt-transport-https to support https APT downloads
+  apt: 
+    name: apt-transport-https 
+    state: present
+
+- when: es_use_repository and es_apt_key
+  name: Debian - Add elastic repository key
+  apt_key: 
+    url: "{{ es_apt_key }}" 
+    state: present
+
+- when: es_use_repository
+  name: Debian - Add elastic repository
+  apt_repository: 
+    repo: "{{ item.repo }}" 
+    state: "{{ item.state}}"
+  with_items:
+    - repo: "{{ es_apt_url_old }}"
+      state: "absent"
+    - repo: "{{ es_apt_url }}"
+      state: "present"
+
+
+- when: es_version_lock
+  name: Debian - Include versionlock
+  include: elasticsearch-Debian-version-lock.yml
+
+- when: es_use_repository
+  block:
+    - when: es_version is defined and
+            es_version != ""
+      set_fact: 
+        package_name: '{{ES_PACKAGE}}={{ es_version }}' 
+        _package_state: present
+    - when: es_update_package == true
+      set_fact: 
+        _package_state: latest
+        package_name: "{{ES_PACKAGE}}" 
+
+    - name: "Debian - Ensure {{ES_PACKAGE}} is installed"
+      apt: 
+        name: "{{package_name}}"
+        state: "{{_package_state}}" 
+        force: "{{_force_install}}" 
+        allow_unauthenticated: "{{ 'no' if es_apt_key else 'yes' }}" 
+        cache_valid_time: 86400
+      register: debian_elasticsearch_install_from_repo
+
+- when: not es_use_repository
+  block: 
+    - name: "Debian - Download {{ES_PACKAGE}} from url"
+      get_url: 
+        url: "{% if es_custom_package_url is defined %}{{ es_custom_package_url }}{% else %}{{ es_package_url }}-{{ es_version }}.deb{% endif %}"
+        dest: "/tmp/{{ES_PACKAGE}}-{{ es_version }}.deb" 
+        validate_certs: no
+
+    - name: "Debian - Ensure {{ES_PACKAGE}} is installed from downloaded package"
+      apt: 
+        deb: "/tmp/{{ES_PACKAGE}}-{{ es_version }}.deb"
+      register: elasticsearch_install_from_package

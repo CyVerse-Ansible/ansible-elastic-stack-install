@@ -1,0 +1,39 @@
+---
+# tasks file for ansible-elastic-stack-install
+- include: check.yml
+  tags:
+    - check
+    - always
+
+- name: os-specific vars
+  include_vars: "{{ansible_os_family}}.yml"
+  tags:
+    - always
+
+- name: check-set-parameters
+  include: elasticsearch-parameters.yml
+  tags:
+    - always
+
+- when: _debug
+  include: _debug.yml
+  tags: 
+    - debug
+
+
+- when: es_java_install
+  include: java.yml
+  tags:
+    - java
+
+- include: "elasticsearch-{{ansible_os_family}}.yml"
+  tags:
+    - install
+
+- include: elasticsearch-config.yml
+  tags:
+      - config
+       
+- meta: flush_handlers
+    
+

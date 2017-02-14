@@ -1,0 +1,45 @@
+---
+- when: ( ansible_distribution == "CentOS" ) and ( ansible_distribution_major_version == "6" )
+  name: Ensure libselinux-python on CentOS 6.x
+  yum: 
+    name: libselinux-python 
+    state: present 
+    update_cache: yes
+
+- when: es_version_lock
+  name: RedHat - include versionlock
+  include: elasticsearch-RedHat-version-lock.yml
+
+- when: es_use_repository
+  block: 
+    - when: es_version is defined and
+            es_version != ""
+      set_fact: 
+        package_name: '{{ES_PACKAGE}}-{{ es_version }}' 
+    - when: es_update_package == true
+      set_fact: 
+        _package_state: "latest"
+        package_name: "{{ES_PACKAGE}}" 
+    - name: RedHat - add Elasticsearch repo
+      template: 
+        src: elasticsearch.repo 
+        dest: "/etc/yum.repos.d/elasticsearch-{{ es_major_version }}.repo"
+    
+    
+    - when: es_use_repository
+      name: "RedHat - Install {{ES_PACKAGE}}"
+      yum: 
+        name: "{{ES_PACKAGE}}-{{ es_version }}" 
+        state: "{{_package_state}}" 
+        update_cache: yes
+      register: redhat_elasticsearch_install_from_repo
+      until: '"failed" not in redhat_elasticsearch_install_from_repo'
+      retries: 5
+      delay: 10
+    
+- when: not es_use_repository
+  name: "RedHat - Install {{ES_PACKAGE}} from url"
+  yum: 
+    name: "{% if es_custom_package_url is defined %}{{ es_custom_package_url }}{% else %}{{ es_package_url }}-{{ es_version }}.noarch.rpm{% endif %}" 
+    state: present
+  register: elasticsearch_install_from_package

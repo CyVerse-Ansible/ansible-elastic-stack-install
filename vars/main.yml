@@ -1,0 +1,12 @@
+---
+es_home: "/usr/share/{{ES_PACKAGE}}"
+es_package_url: "https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch"
+sysd_script: "/usr/lib/systemd/system/{{ES_PACKAGE}}.service"
+init_script: "/etc/init.d/{{ES_PACKAGE}}"
+es_supported_packages:
+   - elasticsearch
+   - logstash
+   - kibana
+   - metricbeat
+   - filebeat
+   - packetbeat

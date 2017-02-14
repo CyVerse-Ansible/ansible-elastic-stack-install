@@ -1,0 +1,92 @@
+---
+#Create required directories
+- name: Create Directories
+  file: 
+    path: "{{ item }}" 
+    state: directory 
+    owner: "{{ es_user }}" 
+    group: "{{ es_group }}"
+  with_items:
+    - "{{pid_dir}}"
+    - "{{log_dir}}"
+    - "{{conf_dir}}"
+    - "{{data_dir}}"
+
+- when: use_system_d
+  name: Ensure systemd service directory exists
+  file:
+     path: "{{sysd_script | dirname}}"
+     state: directory
+
+#Copy the config template
+- when: ES_CONFIG_CONTENTS is defined
+  name: Copy Configuration File
+  copy: 
+    content: "{{ES_CONFIG_CONTENTS}}"
+    dest: "{{conf_dir}}/{{ES_PACKAGE}}.yml" 
+    owner: "{{ es_user }}" 
+    group: "{{ es_group }}" 
+    mode: 0644 
+    force: yes
+  register: config_updated
+  notify: restart service
+
+#Copy the instance specific default file
+- when: DEFAULT_FILE_TEMPLATE_SRC is defined
+  name: Copy Default File for Instance
+  template: 
+    src: "{{DEFAULT_FILE_TEMPLATE_SRC}}" 
+    dest: "{{instance_default_file}}" 
+    mode: 0644 
+    force: yes
+  notify: restart service
+
+#Copy the instance specific init file
+- when: INIT_FILE_TEMPLATE_SRC is defined and
+        not use_system_d 
+  name: Copy Debian Init File for Instance
+  template: 
+    src: "{{INIT_FILE_TEMPLATE_SRC}}" 
+    dest: "{{instance_init_script}}" 
+    mode: 0755 
+    force: yes
+  notify: restart service
+    
+
+#Copy the systemd specific file if systemd is installed
+- when: SYSD_FILE_TEMPLATE_SRC is defined and
+        use_system_d
+  name: Copy Systemd File for Instance
+  template: 
+    src: "{{SYSD_FILE_TEMPLATE_SRC}}" 
+    dest: "{{instance_sysd_script}}" 
+    mode: 0644 
+    force: yes
+  notify:
+  - reload systemd configuration
+  - restart service
+
+
+#Clean up un-wanted package scripts to avoid confusion
+- when: es_instance_name is defined
+  block: 
+    - name: Delete Default Init
+      file: 
+        dest: "{{init_script}}"
+        state: absent
+    
+    - name: Delete Default Environment File
+      file: 
+        dest: "{{default_file}}"
+        state: absent
+    
+    - name: Delete Default Sysconfig File
+      file: 
+        dest: "{{sysd_script}}" 
+        state: absent
+    
+    - name: Delete Default Configuration File
+      file: 
+        dest: "/etc/{{ES_PACKAGE}}/{{ES_PACKAGE}}.yml"
+        state: absent
+  

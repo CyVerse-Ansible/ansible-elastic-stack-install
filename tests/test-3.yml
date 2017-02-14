@@ -1,0 +1,67 @@
+---
+- name: Verify Logstash Directory Layout - w/ `es_instance_name`
+  hosts: localhost
+  remote_user: root
+  vars:
+     instance1: "flow1"
+     instance2: "flow2"
+     es_user: root
+     es_group: root
+     ES_PACKAGE: metricbeat
+     INIT_FILE_TEMPLATE_SRC: "_example.init.ubuntu16.metricbeat.j2"
+     SYSD_FILE_TEMPLATE_SRC: "_example.metricbeat.service.j2"
+     ES_CONFIG_CONTENTS:
+        name: "{{es_instance_name}}"
+  pre_tasks:
+
+  roles:
+     - role: role_under_test
+       es_instance_name: "{{instance1}}"
+     - role: role_under_test
+       es_instance_name: "{{instance2}}"
+  post_tasks:
+     - stat:
+         path: "{{item}}"
+       with_items:
+          - "/etc/{{ES_PACKAGE}}/{{instance1}}/"
+          - "/etc/{{ES_PACKAGE}}/{{instance2}}/"
+          - "/var/lib/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance1}}/"
+          - "/var/lib/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance2}}/"
+          - "/var/log/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance1}}/"
+          - "/var/log/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance2}}/"
+          - "/var/run/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance1}}/"
+          - "/var/run/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance2}}/"
+       register: verify_paths
+     - when: not item.stat.exists
+       fail:
+          msg: "The following path should exist, but doesn't; {{item.item}}"
+       with_items: "{{verify_paths.results}}"
+        
+
+
+     - when: use_system_d 
+       block:
+          - stat: 
+              path: "{{item}}"
+            with_items:
+               - "/usr/lib/systemd/system/{{ES_PACKAGE}}_{{instance1}}.service"
+               - "/usr/lib/systemd/system/{{ES_PACKAGE}}_{{instance2}}.service"
+            register: verify_sysd_files
+          - when: not item.stat.exists
+            fail: 
+              msg: "The following file should exist, but doesn't; {{item.item}}"
+            with_items: "{{verify_sysd_files.results}}"
+
+
+     - when: not use_system_d 
+       block:
+          - stat: 
+              path: "{{item}}"
+            with_items:
+               - "/etc/init.d/{{ES_PACKAGE}}_{{instance1}}"
+               - "/etc/init.d/{{ES_PACKAGE}}_{{instance2}}"
+            register: verify_init_files
+          - when: not item.stat.exists
+            fail:
+               msg: "The following file should exist, but doesn't; {{item.item}}"
+            with_items: "{{verify_init_files.results}}"

@@ -1,0 +1,28 @@
+---
+# defaults file for ansible-elastic-stack-install
+es_user: "{{ES_PACKAGE}}"
+es_group: "{{ES_PACKAGE}}"
+es_major_version: "5.x"
+es_version: "5.2.0"
+es_version_lock: false
+es_use_repository: true
+es_apt_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+es_apt_url: "deb https://artifacts.elastic.co/packages/{{ es_major_version }}/apt stable main"
+es_apt_url_old: "deb http://packages.elastic.co/elasticsearch/{{ es_major_version }}/debian stable main"
+es_start_service: true
+es_restart_on_change: true
+es_allow_downgrades: false
+es_java_install: false
+update_java: false
+es_update_package: true
+
+instance_dir_suffix: "{{inventory_hostname}}{% if es_instance_name is defined %}-{{es_instance_name}}{% endif %}"
+instance_sys_file_name: "{{ES_PACKAGE}}{% if es_instance_name is defined %}_{{es_instance_name}}{% endif %}"
+
+conf_dir: "/etc/{{ES_PACKAGE}}{% if es_instance_name is defined %}/{{es_instance_name}}{% endif %}"
+data_dir: "/var/lib/{{ES_PACKAGE}}{% if es_instance_name is defined %}/{{instance_dir_suffix}}{% endif %}"
+log_dir: "/var/log/{{ES_PACKAGE}}{% if es_instance_name is defined %}/{{instance_dir_suffix}}{% endif %}"
+pid_dir: "/var/run/{{ES_PACKAGE}}{% if es_instance_name is defined %}/{{instance_dir_suffix}}{% endif %}"
+
+_debug: false
+_package_state: "present"

@@ -1,0 +1,14 @@
+---
+- when: var1 is undefined and 
+        var2 is undefined
+  debug: var=ES_CONFIG_CONTENTS
+- when: var1 is defined
+  debug: var=var1
+- when: var2 is defined
+  debug: var=var2
+
+  # Use `--skip-tags=_debug_short_circuit` from the command line to skip.
+- fail: msg='Set `_debug=true` to enable normal operations'
+  tags:
+     - _debug_short_circuit
+
