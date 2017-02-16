@@ -26,6 +26,7 @@
     dest: "{{conf_dir}}/{{ES_PACKAGE}}.yml" 
     owner: "{{ es_user }}" 
     group: "{{ es_group }}" 
+    backup: "{{ _backup_cfg }}"
     mode: 0644 
     force: yes
   register: config_updated

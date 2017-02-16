@@ -28,3 +28,4 @@ pid_dir: "/var/run/{{instance_dir_suffix}}"
 
 _debug: false
 _package_state: "present"
+_backup_cfg: no
