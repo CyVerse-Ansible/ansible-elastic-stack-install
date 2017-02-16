@@ -1,19 +1,24 @@
 ---
-- name: Verify Logstash Directory Layout - w/ `es_instance_name`
+- name: Verify Multi-Instance Directory Layout 
   hosts: localhost
   remote_user: root
   vars:
-     instance1: "flow1"
-     instance2: "flow2"
-     es_user: root
-     es_group: root
-     ES_PACKAGE: metricbeat
-     INIT_FILE_TEMPLATE_SRC: "_example.init.ubuntu16.metricbeat.j2"
-     SYSD_FILE_TEMPLATE_SRC: "_example.metricbeat.service.j2"
+     BEAT_TYPE: metricbeat
+     ES_PACKAGE: "{{BEAT_TYPE | mandatory}}"
+     SYSD_FILE_TEMPLATE_SRC: "beats/systemd/beat.service.j2"
+     INIT_FILE_TEMPLATE_SRC: "beats/init/{{ansible_os_family}}-init.j2"
      ES_CONFIG_CONTENTS:
         name: "{{es_instance_name}}"
-  pre_tasks:
-
+     beat_user: root
+     beat_group: root
+     beat_doc_url: "https://www.elastic.co/products/beats" 
+     beat_description: "It ships things to places"
+     es_user: "{{beat_user}}"
+     es_group: "{{beat_group}}"
+     es_restart_on_change: false
+     es_start_service: false
+     instance1: "flow1"
+     instance2: "flow2"
   roles:
      - role: role_under_test
        es_instance_name: "{{instance1}}"
@@ -25,19 +30,17 @@
        with_items:
           - "/etc/{{ES_PACKAGE}}/{{instance1}}/"
           - "/etc/{{ES_PACKAGE}}/{{instance2}}/"
-          - "/var/lib/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance1}}/"
-          - "/var/lib/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance2}}/"
-          - "/var/log/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance1}}/"
-          - "/var/log/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance2}}/"
-          - "/var/run/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance1}}/"
-          - "/var/run/{{ES_PACKAGE}}/{{inventory_hostname}}-{{instance2}}/"
+          - "/var/lib/{{ES_PACKAGE}}/{{instance1}}/"
+          - "/var/lib/{{ES_PACKAGE}}/{{instance2}}/"
+          - "/var/log/{{ES_PACKAGE}}/{{instance1}}/"
+          - "/var/log/{{ES_PACKAGE}}/{{instance2}}/"
+          - "/var/run/{{ES_PACKAGE}}/{{instance1}}/"
+          - "/var/run/{{ES_PACKAGE}}/{{instance2}}/"
        register: verify_paths
      - when: not item.stat.exists
        fail:
           msg: "The following path should exist, but doesn't; {{item.item}}"
        with_items: "{{verify_paths.results}}"
-        
-
 
      - when: use_system_d 
        block:

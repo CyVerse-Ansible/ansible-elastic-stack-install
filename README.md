@@ -2,6 +2,8 @@ ansible-elastic-stack-install
 =============================
 [![Build Status](https://travis-ci.org/CyVerse-Ansible/ansible-elastic-stack-install.svg?branch=master)](https://travis-ci.org/CyVerse-Ansible/ansible-elastic-stack-install)
 
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-elastic--stack--install-blue.svg)](https://galaxy.ansible.com/CyVerse-Ansible/ansible-elastic-stack-install/)
+
 Performs basic installation and configuration of Elastic-Stack components, in accordance with Elastic's established packaging conventions.
 This role is a "clone-and-own" of files from the [elastic/ansible-elasticsearch][ansible-elasticsearch] GH repo.
 
@@ -14,6 +16,7 @@ Currently, only repository-based installations are tested.
 
 Role Variables
 ==============
+
 User-Required Variables
 -----------------------
 
@@ -23,7 +26,7 @@ User-Required Variables
 | `es_instance_name`      | no                         |      none      | See the `"Instances"` section. | 
 | `ES_CONFIG_CONTENTS`    | yes (w/ `es_instance_name`)|      none      | Variable which contains the contents of the Elastic-Stack package's `*.yml` file. | 
 | `INIT_FILE_TEMPLATE_SRC`| yes (w/ `es_instance_name`)|      none      | Path to instance-specific init file Jinja template. When `es_instance_name` is set, this variable is required on non-_systemd_ hosts.|
-| `SYSD_FILE_TEMPLATE_SRC`| yes (w/ `es_instance_name`)|      none      | Path to instance-specifica systemd service file Jinja template. When `es_instance_name` is set, this variable is required on _systemd_-capable hosts. |
+| `SYSD_FILE_TEMPLATE_SRC`| yes (w/ `es_instance_name`)|      none      | Path to instance-specifica systemd service file Jinja template. When `es_instance_name` is set, this variable is required on _systemd_-capable hosts. | 
 
 Default Directory Layout
 ------------------------

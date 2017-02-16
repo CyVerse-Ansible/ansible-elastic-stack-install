@@ -1,0 +1,22 @@
+[Unit]
+Description={{instance_sys_file_name}}
+Documentation={{beat_doc_url}}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{beat_user}}
+Group={{beat_group}}
+
+ExecStart={{es_home}}/bin/{{BEAT_TYPE}} \
+       -c {{conf_dir}}/{{conf_file}}  \
+       -path.home   {{es_home}} \
+       -path.config {{conf_dir}} \
+       -path.data   {{data_dir}} \
+       -path.logs   {{log_dir}}
+
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target

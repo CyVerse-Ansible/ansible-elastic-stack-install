@@ -1,10 +1,4 @@
 ---
-# tasks file for ansible-elastic-stack-install
-- include: check.yml
-  tags:
-    - check
-    - always
-
 - name: os-specific vars
   include_vars: "{{ansible_os_family}}.yml"
   tags:
@@ -13,6 +7,7 @@
 - name: check-set-parameters
   include: elasticsearch-parameters.yml
   tags:
+    - check
     - always
 
 - when: _debug

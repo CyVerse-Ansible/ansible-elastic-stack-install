@@ -1,5 +1,5 @@
 ---
-- name: Verify Directory Layout - w/o `es_instance_name`
+- name: Verify Default Directory Layout - w/o `es_instance_name`
   hosts: localhost
   remote_user: root
   pre_tasks:
@@ -27,11 +27,13 @@
   roles:
     - role_under_test
   post_tasks:
-     - when: instance_sysd_script != sysd_script
+     - when: use_system_d and
+             instance_sysd_script != sysd_script
        fail: 
          msg: "instance_sysd_script = {{instance_sysd_script}}, but should be {{sysd_script}} "
 
-     - when: instance_init_script != init_script
+     - when: not use_system_d and 
+             instance_init_script != init_script
        fail: 
          msg: "instance_init_script = {{instance_init_script}}, but should be {{init_script}} "
 

@@ -1,0 +1,63 @@
+---
+- name: Verify Instance-Specific Directory Layout 
+  hosts: localhost
+  remote_user: root
+  vars:
+     ES_PACKAGE: "{{BEAT_TYPE | mandatory}}"
+     SYSD_FILE_TEMPLATE_SRC: "beats/systemd/beat.service.j2"
+     INIT_FILE_TEMPLATE_SRC: "beats/init/{{ansible_os_family}}-init.j2"
+     ES_CONFIG_CONTENTS: 
+       sample_var1: "{{ES_PACKAGE}}-sample1"
+       sample_var2: "{{ES_PACKAGE}}-sample2"
+     es_instance_name: "{{ES_PACKAGE}}_test_instance"
+     beat_user: root
+     beat_group: root
+     beat_doc_url: "https://www.elastic.co/products/beats" 
+     beat_description: "It ships things to places"
+     es_user: "{{beat_user}}"
+     es_group: "{{beat_group}}"
+     es_restart_on_change: false
+     es_start_service: false
+  pre_tasks:
+     - when: es_home != '/usr/share/{{ES_PACKAGE}}'
+       fail: 
+         msg: "es_home = {{es_home}}, but should be '/usr/share/{{ES_PACKAGE}}'"
+
+     - when: instance_dir_suffix != '{{ES_PACKAGE}}/{{es_instance_name}}'
+       fail: 
+         msg: "instance_dir_suffix = {{instance_dir_suffix}}, but should be '{{es_instance_name}}'"
+
+     - when: conf_dir != '/etc/{{instance_dir_suffix}}'
+       fail: 
+         msg: "conf_dir = {{conf_dir}}, but should be '/etc/{{instance_dir_suffix}}'"
+
+     - when: "data_dir != '/var/lib/{{instance_dir_suffix}}'"
+       fail: 
+         msg: "data_dir = {{data_dir}}, but should be '/var/lib/{{instance_dir_suffix}}'"
+
+     - when: log_dir != '/var/log/{{instance_dir_suffix}}'
+       fail: 
+         msg: "log_dir = {{log_dir}}, but should be '/var/log/{{instance_dir_suffix}}'"
+
+     - when: pid_dir != '/var/run/{{instance_dir_suffix}}'
+       fail: 
+         msg: "pid_dir = {{pid_dir}}, but should be '/var/run/{{instance_dir_suffix}}'"
+
+  roles:
+    - role_under_test
+  post_tasks:
+     - when: use_system_d and
+             instance_sysd_script != '/usr/lib/systemd/system/{{instance_sys_file_name}}.service'
+       fail: 
+         msg: "instance_sysd_script = {{instance_sysd_script}}, but should be '/usr/lib/systemd/system/{{instance_sys_file_name}}.service'"
+
+     - when: not use_system_d and 
+             instance_init_script != '/etc/init.d/{{instance_sys_file_name}}'
+       fail: 
+         msg: "instance_init_script = {{instance_init_script}}, but should be '/etc/init.d/{{instance_sys_file_name}}'"
+
+     - when: instance_default_file is defined and
+             instance_default_file != "{{default_file | dirname}}/{{instance_sys_file_name}}"
+       fail: 
+         msg: "instance_default_file = {{instance_default_file}}, but should be  '{{default_file | dirname}}/{{instance_sys_file_name}}'"
+

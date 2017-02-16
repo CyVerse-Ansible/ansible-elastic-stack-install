@@ -38,8 +38,8 @@
         _package_state: present
     - when: es_update_package == true
       set_fact: 
-        _package_state: latest
         package_name: "{{ES_PACKAGE}}" 
+        _package_state: latest
 
     - name: "Debian - Ensure {{ES_PACKAGE}} is installed"
       apt: 
