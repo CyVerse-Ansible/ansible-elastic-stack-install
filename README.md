@@ -2,7 +2,7 @@ ansible-elastic-stack-install
 =============================
 [![Build Status](https://travis-ci.org/CyVerse-Ansible/ansible-elastic-stack-install.svg?branch=master)](https://travis-ci.org/CyVerse-Ansible/ansible-elastic-stack-install)
 
-[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-elastic--stack--install-blue.svg)](https://galaxy.ansible.com/CyVerse-Ansible/ansible-elastic-stack-install/)
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-elastic--stack--install-blue.svg)](https://galaxy.ansible.com/CyVerse-Ansible/elastic-stack-install/)
 
 Performs basic installation and configuration of Elastic-Stack components, in accordance with Elastic's established packaging conventions.
 This role is a "clone-and-own" of files from the [elastic/ansible-elasticsearch][ansible-elasticsearch] GH repo.
