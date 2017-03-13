@@ -100,6 +100,9 @@ Due to this inconsistency, this role will remove the default service file from *
 
 When a valid `SYSD_FILE_TEMPLATE_SRC` is given, it will be installed in the following location: `/usr/lib/systemd/system/`
 
+Furthermore, this role maintains the service file templates used for `systemd` and `SysV INIT` in the [templates/](./templates) directory. These templates are 
+created from real installations.
+
 
 Optional Variables
 ------------------
