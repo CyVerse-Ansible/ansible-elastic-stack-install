@@ -22,7 +22,7 @@
 - when: ES_CONFIG_CONTENTS is defined
   name: Copy Configuration File
   copy: 
-    content: "{{ES_CONFIG_CONTENTS}}"
+    content: "{{ES_CONFIG_CONTENTS | to_nice_yaml }}"
     dest: "{{conf_dir}}/{{ES_PACKAGE}}.yml" 
     owner: "{{ es_user }}" 
     group: "{{ es_group }}" 
