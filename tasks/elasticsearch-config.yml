@@ -74,22 +74,30 @@
   file: 
     dest: "{{init_script}}"
     state: absent
+  tags: 
+    - cleanup
 
 - when: es_instance_name is defined
   name: Delete Default Environment File
   file: 
     dest: "{{default_file}}"
     state: absent
+  tags: 
+    - cleanup
 
 - when: es_instance_name is defined
   name: Delete Default Sysconfig File
   file: 
     dest: "{{sysd_script}}" 
     state: absent
+  tags: 
+    - cleanup
 
 - when: es_instance_name is defined
   name: Delete Default Configuration File
   file: 
     dest: "/etc/{{ES_PACKAGE}}/{{conf_file}}"
     state: absent
+  tags: 
+    - cleanup
   
